@@ -45,3 +45,41 @@ Hàm thực hiện tính toán sẽ là hàm eval() thực hiện `+`, `-`, `*`,
 
 
 # Exploit
+
+Để exploit chương trình calc cần phải trả lời 2 câu hỏi là:
+* Chương trình calc như trên bị lỗi chỗ nào?
+* Khai thác nó như thế nào?
+
+### Chương trình calc như trên bị lỗi chỗ nào?
+
+Trong hàm parse_expr() có 1 lỗi logic, khi chương trình xét theo dấu express, thì nếu họ nhập -1. thì lệnh sau đây không được check vì lúc này v9=0
+```sh
+if ( v9 > 0 )
+      {
+        v3 = (*a2)++;
+        a2[v3 + 1] = v9;
+      }
+```
+do khi gặp expression đầu tiên thì v7 = i + a1 - v4 (v4=a1,i=0) 
+```sh
+s1 = malloc(v7 + 1);
+memcpy(s1, v4, v7);
+s1[v7] = 0;  -- s1[0] = 0
+...
+v9 = atoi(s1); -- v9 = 0
+```
+Thì lỗi chỗ này sẽ xảy ra như sau: khi người dùng nhập:
+`-1+66` chương trình sẽ lấy 0-1 = -1, và do lệnh if ở trên ko được check, nên khi thực hiện hàm eval() biến *(a2) sẽ giảm xuống 1 đơn vị, và (*a2) lúc này sẽ trỏ đến a2[-1] sẽ nhân được giá trị là 66 do a2[v3+1] = v9 (a2[0]=v9)
+
+thì lúc này chúng ta sẽ lợi dụng a2[v3+1]=v9 để Write-What-Where.
+
+### Khai thác nó như thế nào?
+
+Dùng `-1+offset+value` để ghi value vào offset bắt đầu từ *(a2) để ghi các giá trị. Vậy ghi cái gì và ghi ở đâu.
+
+Do chương trình build static, nên sẽ không có libc, nhưng bù lại, chúng ta có ropchain, dùng ropchain có sẵn bằng lệnh.
+`ROPgadget --binary calc --ropchain`
+
+Và cuối cùng là ghi vào nơi ret của hàm main(). Vì chúng ta phải dùng hàm parse_expr() để ghi, nên hàm main() sẽ là lựa chọn tốt.
+
+# FLAG{C:\Windows\System32\calc.exe}
