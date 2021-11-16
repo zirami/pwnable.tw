@@ -19,6 +19,12 @@ pwndbg> checksec
 ```
 
 Dùng IDA xem pseudo code của file calc
-
-
+Hàm main setup alarm(60), sau 60s thì chương trình sẽ bị ngắt, sau đó gọi hàm calc.
+![main](https://github.com/zirami/pwnable.tw/blob/main/calc/images/main.png)
+Hàm calc sẽ là hàm xử lý chính trong chương trình và nằm trong vòng lặp while(1)
+![calc](https://github.com/zirami/pwnable.tw/blob/main/calc/images/calc.png)
+Trước khi thực hiện gọi hàm get_expr() thì gọi hàm bzero(s,0x400), theo mình mình hiểu thì nó sẽ re_init lại biến s
+![bzero](https://github.com/zirami/pwnable.tw/blob/main/calc/images/bzero.png)
+Tiếp theo gọi hàm get_expr(s,1024) để nhận các giá trị input được filter theo các ký tự đã được định nghĩa sẵn như: 0-9, '+', '-', '*', '/', '%'. Các ký tự còn lại sẽ ko được ghi nhận.
+![get_expr](https://github.com/zirami/pwnable.tw/blob/main/calc/images/get_expr.png)
 # Exploit
