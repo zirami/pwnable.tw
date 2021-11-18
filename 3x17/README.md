@@ -106,7 +106,7 @@ void __fastcall __noreturn start(__int64 a1, __int64 a2, void (*a3)(void))
 ```
 
 Các tham số sẽ được định nghĩa như sau, theo link phía trên
-![libc_start_main](https://github.com/zirami/pwnable.tw/tree/main/3x17/images/__libc_start_main)
+![libc_start_main](https://github.com/zirami/pwnable.tw/blob/main/3x17/images/__libc_start_main.png)
 
 Và chương trình sau khi kết thúc hàm main, thì mục `fini` được thực thi, cho nên mục tiêu chúng ta sẽ nhắm để để ghi là mục `fini` này với địa chỉ của main để tạo 1 vòng lặp vô hạn.
 
