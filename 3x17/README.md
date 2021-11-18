@@ -55,6 +55,71 @@ Bên cạnh đó, file được build với statically, nên phần đè mục G
 
 Nếu chương trình build static thì vấn đề Write-What-Where vẫn chưa được xử lý! Vậy phải giải quyết như thế nào.
 Để giải quyết vấn đề này, cần hiểu thêm 1 chút về file ELF, là cách hoạt động của file, mọi người có thể tìm đọc và hiểu tại đây.
-![file-elf](http://blog.k3170makan.com/2018/10/introduction-to-elf-format-part-v.html)
+```sh
+http://blog.k3170makan.com/2018/10/introduction-to-elf-format-part-v.html
+```
 
+Nói một cách đơn giản, thì khi chương trình bắt đầu, hàm _start sẽ được thực thi trước chứ không phải hàm main và nó gọi hàm __libc_start_main() với các tham số là hàm main và các hàm khác, trong đó có 2 phần là `init` và `fini`.
+
+Dưới đây là hàm start của file 3x17 đã được stripped
+```sh
+void __fastcall __noreturn start(__int64 a1, __int64 a2, __int64 a3)
+{
+  __int64 v3; // rax
+  unsigned int v4; // esi
+  __int64 v5; // [rsp-8h] [rbp-8h] BYREF
+  void *retaddr; // [rsp+0h] [rbp+0h] BYREF
+
+  v4 = v5;
+  v5 = v3;
+  sub_401EB0(
+    (__int64 (__fastcall *)(_QWORD, __int64, __int64))main_func,
+    v4,
+    (__int64)&retaddr,
+    (void (__fastcall *)(_QWORD, __int64, __int64))sub_4028D0,
+    (__int64)sub_402960,
+    a3,
+    (__int64)&v5);
+}
+```
+Đây là hàm start của file test_no_stripped được mình tạo 
+```sh
+void __fastcall __noreturn start(__int64 a1, __int64 a2, void (*a3)(void))
+{
+  __int64 v3; // rax
+  int v4; // esi
+  __int64 v5; // [rsp-8h] [rbp-8h] BYREF
+  char *retaddr; // [rsp+0h] [rbp+0h] BYREF
+
+  v4 = v5;
+  v5 = v3;
+  _libc_start_main(
+    (int (__fastcall *)(int, char **, char **))main,
+    v4,
+    &retaddr,
+    _libc_csu_init,
+    _libc_csu_fini,
+    a3,
+    &v5);
+  __halt();
+}
+```
+
+Các tham số sẽ được định nghĩa như sau, theo link phía trên
+![libc_start_main](https://github.com/zirami/pwnable.tw/tree/main/3x17/images/__libc_start_main)
+
+Và chương trình sau khi kết thúc hàm main, thì mục `fini` được thực thi, cho nên mục tiêu chúng ta sẽ nhắm để để ghi là mục `fini` này với địa chỉ của main để tạo 1 vòng lặp vô hạn.
+
+Sau đó thực hiện ROP 64-bit đơn giản, vi static nên gadget sẽ rất dễ tìm.
+Một số gadget
+```sh
+POP_RDI = 0x401696
+POP_RSI =0x406c30
+POP_RAX = 0x41e4af
+POP_RDX = 0x446e35
+SYSCALL = 0x4022b4
+RET = 0x401016
+LEAVE_RET = 0x401c4b
+```
+Và sau khi thực hiện ghi đè xong, thì phải giải quyết vấn đề vòng lặp để có thể Ret được. Dùng gadget LEAVE_RET phía trên để giải quyết vấn đề cuối này và get shell.
 # FLAG{Its_just_a_b4by_c4ll_0riented_Pr0gramm1ng_in_3xit}
