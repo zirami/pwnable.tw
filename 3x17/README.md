@@ -1,5 +1,9 @@
 # 3x17
-
+```sh
+*/
+cre: https://0xfeebe.medium.com/3x17-pwnable-tw-7713f7d41ffa
+/*
+```
 # Reverse
 
 Xem các thông số file 3x17
