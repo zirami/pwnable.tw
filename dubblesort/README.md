@@ -58,6 +58,7 @@ Vấn đề cuối là vùng canary, chưa biết canary là gì với không th
 `__isoc99_scanf("%u", v4);` để nhập giá trị đầu vào cho v4. mà đặc tả %u thường được sử dụng cho địa chỉ và số nguyên. nên khi nhập giá trị khác, ví dụ '+' thì return value sẽ không được match 
 ![return_value](https://github.com/zirami/pwnable.tw/blob/main/dubblesort/images/return_value.png)
 ![poc_scanf1](https://github.com/zirami/pwnable.tw/blob/main/dubblesort/images/poc_scanf1.png)
+Sau khi nhập '+' thì 0xffffcc9c trong EDI vẫn không thay đổi.
 ![poc_scanf2](https://github.com/zirami/pwnable.tw/blob/main/dubblesort/images/poc_scanf2.png)
 Vì vậy ngay tại chỗ canary, mình sẽ nhập '+' thì canary vẫn được giữ nguyên.
 
